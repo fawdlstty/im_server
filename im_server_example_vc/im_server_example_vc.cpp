@@ -10,8 +10,9 @@
 int main () {
 	im_server_t _server { 1 };
 	_server.on_open_callback ([] (std::shared_ptr<im_connect_t> _conn, int64_t _cid) {
+		std::string _val = _conn->get_param ("xx");
 		auto [_ip, _port] = _conn->remote_info ();
-		std::cout << "connect: " << _ip << "[" << _port << "]" << std::endl;
+		std::cout << "connect: " << _ip << "[" << _port << "] xx[" << _val << "]" << std::endl;
 	});
 	_server.on_string_message_callback ([] (std::shared_ptr<im_connect_t> _conn, int64_t _cid, std::string _data) {
 		std::cout << "recv string: " << _data << std::endl;

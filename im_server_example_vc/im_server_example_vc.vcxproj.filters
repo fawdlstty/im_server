@@ -44,5 +44,80 @@
     <ClInclude Include="..\taskpool\taskpool_t.hpp">
       <Filter>头文件\taskpool</Filter>
     </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\code_parser.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\connection.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\content_type.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\files.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\http_handler.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\http_parser.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\http_router.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\http_server.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\inja.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\ioservice_pool.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\json.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\md5.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\message_handler.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\mime.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\nanolog.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\response_status.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\session.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\sha1.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\string_view.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\utils.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\uuid.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\websokcet.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\xfinal.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\any.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xfinal\xfinal\client.hpp">
+      <Filter>头文件\xfinal</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

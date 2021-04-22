@@ -23,7 +23,7 @@ public:
 		m_event.on ("open", [this] (xfinal::websocket &ws) {
 			//std::cout << "websocket open: " << ws.key_params () ["xx"] << std::endl;
 			std::unique_lock<std::recursive_mutex> ul { m_mtx };
-			int _cid = ++m_inc_cid;
+			int64_t _cid = ++m_inc_cid;
 			ws.set_user_data ("cid", std::make_shared<int64_t> (_cid));
 			auto _connect_t = std::make_shared<im_connect_t> (ws.shared_from_this ());
 			m_conns [_cid] = _connect_t;

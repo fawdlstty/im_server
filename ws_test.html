@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>WebSocket Test</title>
+<script language="javascript" type="text/javascript">
+	var output;
+
+	function init() {
+		output = document.getElementById("output");
+		testWebSocket();
+	}
+
+	function testWebSocket() {
+		try {
+			websocket = new WebSocket("ws://127.0.0.1:8080/ws?xx=hello");
+			websocket.onopen = function (evt) {
+				writeToScreen("CONNECTED");
+				//doSend("WebSocket rocks");
+			};
+			websocket.onclose = function (evt) {
+				//writeToScreen("DISCONNECTED");
+				writeToScreen('<span>DISCONNECTED:</span> ' + evt.code + '----' + evt.reason + '----' + evt.wasClean);
+			};
+			websocket.onmessage = function (evt) {
+				writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+				//websocket.close();
+			};
+			websocket.onerror = function (evt) {
+				writeToScreen('<span style="color: red;">ERROR:</span> ' + JSON.stringify (evt));
+			};
+		} catch (err) {
+			writeToScreen('<span style="color: red;">EXCEPTION: ' + err.message + '</span>');
+		}
+	}
+
+	function doSend(message) {
+		writeToScreen("SENT: " + message);
+		websocket.send(message);
+	}
+
+	function writeToScreen(message) {
+		var pre = document.createElement("p");
+		pre.style.wordWrap = "break-word";
+		pre.innerHTML = message;
+		output.appendChild(pre);
+	}
+
+	window.addEventListener("load", init, false); 
+</script>
+<h2>WebSocket Test</h2>
+<input type="text" id="senddata" /><button onclick="doSend(document.getElementById('senddata').value)">发送</button><button onclick="websocket.close()">关闭</button>
+<div id="output"></div>
+
+</html>
