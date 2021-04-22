@@ -16,6 +16,12 @@
     <Filter Include="头文件\im_server">
       <UniqueIdentifier>{996ced08-c4d7-49a6-b8ba-3df8027056f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\xfinal">
+      <UniqueIdentifier>{a1621edd-f218-4fc3-a8d7-e4b0cd827200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\taskpool">
+      <UniqueIdentifier>{189837fc-e2cb-44e1-956c-c6ae632b451a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="im_server_example_vc.cpp">
@@ -29,11 +35,14 @@
     <ClInclude Include="..\im_server\im_server_t.hpp">
       <Filter>头文件\im_server</Filter>
     </ClInclude>
-    <ClInclude Include="..\im_server\im_base_t.hpp">
+    <ClInclude Include="..\im_server\im_server_base_t.hpp">
       <Filter>头文件\im_server</Filter>
     </ClInclude>
     <ClInclude Include="..\im_server\im_connect_t.hpp">
       <Filter>头文件\im_server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\taskpool\taskpool_t.hpp">
+      <Filter>头文件\taskpool</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
