@@ -14,8 +14,13 @@ int main () {
 		auto [_ip, _port] = _conn->remote_info ();
 		std::cout << "connect: " << _ip << "[" << _port << "] xx[" << _val << "]" << std::endl;
 	});
-	_server.on_string_message_callback ([] (std::shared_ptr<im_connect_t> _conn, int64_t _cid, std::string _data) {
+	_server.on_string_message_callback ([&] (std::shared_ptr<im_connect_t> _conn, int64_t _cid, std::string _data) {
 		std::cout << "recv string: " << _data << std::endl;
+		if (_data == "close") {
+			std::thread ([&] () {
+				_server.stop ();
+			}).detach ();
+		}
 	});
 	_server.on_binary_message_callback ([] (std::shared_ptr<im_connect_t> _conn, int64_t _cid, const uint8_t *_data, size_t _size) {
 		std::cout << "recv binary(size): " << _size << std::endl;
@@ -24,5 +29,11 @@ int main () {
 		std::cout << "disconnect" << std::endl;
 	});
 	_server.start (8080, "/ws");
+	//taskpool_t _pool { 1 };
+	//auto _future = _pool.run_for (std::chrono::seconds (3), [] () -> int { return 42; });
+	//_pool.append_after (std::move (_future), [] (int n) -> int { std::cout << n << std::endl; return 0; });
+	//std::cout << "main end\n";
+	//int ch;
+	//std::cin >> ch;
 	return 0;
 }
