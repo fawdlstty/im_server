@@ -29,11 +29,5 @@ int main () {
 		std::cout << "disconnect" << std::endl;
 	});
 	_server.start (8080, "/ws");
-	//taskpool_t _pool { 1 };
-	//auto _future = _pool.run_for (std::chrono::seconds (3), [] () -> int { return 42; });
-	//_pool.append_after (std::move (_future), [] (int n) -> int { std::cout << n << std::endl; return 0; });
-	//std::cout << "main end\n";
-	//int ch;
-	//std::cin >> ch;
 	return 0;
 }
