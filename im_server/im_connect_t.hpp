@@ -37,12 +37,17 @@ public:
 		return { _ep.address ().to_string (), _ep.port () };
 	}
 
-	std::string get_param (std::string _key) {
-		return m_ws->key_params ()[_key];
-	}
+	std::string get_param (std::string _key) { return m_ws->key_params ()[_key]; }
+
+	void close () { m_ws->close (); }
+
+	int64_t get_cid () { return m_cid; }
+
+	void _set_cid (int64_t _cid) { m_cid = _cid; }
 
 private:
 	std::shared_ptr<xfinal::websocket> m_ws;
+	int64_t m_cid = -1;
 };
 
 
