@@ -43,7 +43,10 @@ public:
 
 	int64_t get_cid () { return m_cid; }
 
-	void _set_cid (int64_t _cid) { m_cid = _cid; }
+	void _set_cid (int64_t _cid) {
+		m_cid = _cid;
+		m_ws->set_user_data ("cid", std::make_shared<int64_t> (_cid));
+	}
 
 private:
 	std::shared_ptr<xfinal::websocket> m_ws;

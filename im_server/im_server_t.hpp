@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -27,10 +28,10 @@ class im_server_t {
 public:
 	im_server_t (size_t _threads): m_base (_threads) {}
 
-	void on_open_callback (std::function<void (std::shared_ptr<im_connect_t>, int64_t)> _callback) { m_base.on_open_callback (_callback); }
-	void on_string_message_callback (std::function<void (std::shared_ptr<im_connect_t>, int64_t, std::string)> _callback) { m_base.on_string_message_callback (_callback); }
-	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, int64_t, const uint8_t *, size_t)> _callback) { m_base.on_binary_message_callback (_callback); }
-	void on_close_callback (std::function<void (std::shared_ptr<im_connect_t>, int64_t)> _callback) { m_base.on_close_callback (_callback); }
+	void on_open_callback (std::function<std::optional<int64_t> (std::shared_ptr<im_connect_t>)> _callback) { m_base.on_open_callback (_callback); }
+	void on_string_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::string)> _callback) { m_base.on_string_message_callback (_callback); }
+	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, const uint8_t *, size_t)> _callback) { m_base.on_binary_message_callback (_callback); }
+	void on_close_callback (std::function<void (std::shared_ptr<im_connect_t>)> _callback) { m_base.on_close_callback (_callback); }
 	bool send_string (int64_t _cid, std::string _data) { return m_base.send_string (_cid, _data); }
 	bool send_binary (int64_t _cid, const uint8_t *_data, size_t _size) { return m_base.send_binary (_cid, _data, _size); }
 

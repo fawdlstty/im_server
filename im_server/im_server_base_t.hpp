@@ -27,8 +27,8 @@ public:
 			if (!m_open_callback)
 				return;
 			auto _connect_t = std::make_shared<im_connect_t> (ws.shared_from_this ());
-			auto _fut = m_pool.run (m_open_callback, _connect_t);
-			m_pool.after_run (std::move (_fut), [this, _connect_t] (std::optional<int64_t> _ocid) {
+			auto _fut = m_pool.async_run (m_open_callback, _connect_t);
+			m_pool.async_after_run (std::move (_fut), [this, _connect_t] (std::optional<int64_t> _ocid) {
 				if (_ocid.has_value ()) {
 					int64_t _cid = _ocid.value ();
 					std::unique_lock<std::recursive_mutex> ul { m_mtx };
@@ -49,17 +49,20 @@ public:
 					m_string_message_callback (_p->second, _recv);
 				} else {
 					auto _recv = ws.messages ();
-					m_pool.run (m_binary_message_callback, _p->second, (const uint8_t *) _recv.data (), _recv.size ());
+					m_pool.async_run (m_binary_message_callback, _p->second, (const uint8_t *) _recv.data (), _recv.size ());
 				}
 			}
 		});
 		m_event.on ("close", [this] (xfinal::websocket &ws) {
 			std::unique_lock<std::recursive_mutex> ul { m_mtx };
-			int64_t _cid = *ws.get_user_data<std::shared_ptr<int64_t>> ("cid");
+			auto _puid = ws.get_user_data<std::shared_ptr<int64_t>> ("cid");
+			if (!_puid)
+				return;
+			int64_t _cid = *_puid;
 			auto _p = m_conns.find (_cid);
 			if (_p != m_conns.end ()) {
 				if (m_close_callback) {
-					m_pool.run (m_close_callback, _p->second);
+					m_pool.async_run (m_close_callback, _p->second);
 				}
 				m_conns.erase (_p);
 			}
