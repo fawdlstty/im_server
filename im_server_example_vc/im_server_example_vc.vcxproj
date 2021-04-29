@@ -168,7 +168,6 @@
   <ItemGroup>
     <ClInclude Include="..\im_server\im_connect_t.hpp" />
     <ClInclude Include="..\im_server\im_server.hpp" />
-    <ClInclude Include="..\im_server\im_server_base_t.hpp" />
     <ClInclude Include="..\im_server\im_server_t.hpp" />
     <ClInclude Include="..\taskpool\taskpool_t.hpp" />
     <ClInclude Include="..\xfinal\xfinal\any.hpp" />
