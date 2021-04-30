@@ -166,6 +166,7 @@
     <ClCompile Include="im_server_example_vc.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\im_server\common_t.hpp" />
     <ClInclude Include="..\im_server\im_connect_t.hpp" />
     <ClInclude Include="..\im_server\im_server.hpp" />
     <ClInclude Include="..\im_server\im_server_t.hpp" />

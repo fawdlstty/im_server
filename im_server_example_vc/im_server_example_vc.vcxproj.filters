@@ -116,5 +116,8 @@
     <ClInclude Include="..\xfinal\xfinal\client.hpp">
       <Filter>头文件\xfinal</Filter>
     </ClInclude>
+    <ClInclude Include="..\im_server\common_t.hpp">
+      <Filter>头文件\im_server</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

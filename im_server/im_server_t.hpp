@@ -17,15 +17,18 @@
 
 
 
-class _session_storage: public xfinal::session_storage {
-public:
-	bool init () { return true; }
-	void save (xfinal::session &session) {}
-	void remove (xfinal::session &session) {}
-	void remove (std::string const &uuid) {}
-};
 
 class im_server_t {
+	class _session_storage: public xfinal::session_storage {
+	public:
+		bool init () { return true; }
+		void save (xfinal::session &session) {}
+		void remove (xfinal::session &session) {}
+		void remove (std::string const &uuid) {}
+	};
+
+	enum class _find_type_t { stay, remove };
+
 public:
 	im_server_t (size_t _io_thread_num, size_t _process_thread_num): m_io_thread_num (m_io_thread_num), m_pool (_process_thread_num) {
 		m_event.on ("open", [this] (xfinal::websocket &ws) {
@@ -38,25 +41,26 @@ public:
 					int64_t _cid = _ocid.value ();
 					_add_connect (_cid, _connect_t);
 				} else {
-					_connect_t->send_string ("[im_server] auth failed.");
-					auto _fut = m_pool.async_wait (std::chrono::seconds (1));
-					m_pool.async_after_run (std::move (_fut), [_connect_t] () {
-						_connect_t->close ();
-					});
+					auto _fut = _connect_t->send_string ("[im_server] auth failed.");
+					m_pool.async_after_run (std::move (_fut), [_connect_t] (bool) { _connect_t->close (); });
 				}
 			});
 		});
 		m_event.on ("message", [this] (xfinal::websocket &ws) {
-			std::unique_lock<std::recursive_mutex> ul { m_mtx };
-			int64_t _cid = *ws.get_user_data<std::shared_ptr<int64_t>> ("cid");
-			auto _p = m_conns.find (_cid);
-			if (_p != m_conns.end ()) {
+			std::optional<std::shared_ptr<im_connect_t>> _conn = _get_connect (ws);
+			if (!_conn.has_value ())
+				return;
+			if (ws.message_code () == 1) {
 				std::string _recv = std::string (ws.messages ());
-				m_pool.async_run (ws.message_code () == 1 ? m_string_message_callback : m_binary_message_callback, _p->second, _recv);
+				m_pool.async_run (m_string_message_callback, _conn.value (), _recv);
+			} else if (ws.message_code () == 2) {
+				std::string_view _view = ws.messages ();
+				std::vector<uint8_t> _v (_view.begin (), _view.end ());
+				m_pool.async_run (m_binary_message_callback, _conn.value (), std::move (_v));
 			}
 		});
 		m_event.on ("close", [this] (xfinal::websocket &ws) {
-			std::optional<std::shared_ptr<im_connect_t>> _conn = _get_connect (ws, true);
+			std::optional<std::shared_ptr<im_connect_t>> _conn = _get_connect (ws, _find_type_t::remove);
 			if (!_conn.has_value ())
 				return;
 			if (m_close_callback)
@@ -70,20 +74,28 @@ public:
 	void on_string_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::string)> _callback) {
 		m_string_message_callback = _callback;
 	}
-	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::string)> _callback) {
+	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::vector<uint8_t>)> _callback) {
 		m_binary_message_callback = _callback;
 	}
 	void on_close_callback (std::function<void (int64_t)> _callback) {
 		m_close_callback = _callback;
 	}
 
-	bool send_client_string (int64_t _cid, std::string _data) {
+	std::future<bool> &&send_client_string (int64_t _cid, const std::string &_data) {
 		auto _conn = _get_connect (_cid);
-		return _conn.has_value () ? _conn.value ()->send_string (_data) : false;
+		if (!_conn.has_value ()) {
+			return common_t::get_valued_future (false);
+		} else {
+			return _conn.value ()->send_string (_data);
+		}
 	}
-	bool send_client_binary (int64_t _cid, const uint8_t *_data, size_t _size) {
+	std::future<bool> &&send_client_binary (int64_t _cid, const std::vector<uint8_t> &_data) {
 		auto _conn = _get_connect (_cid);
-		return _conn.has_value () ? _conn.value ()->send_binary (_data, _size) : false;
+		if (!_conn.has_value ()) {
+			return common_t::get_valued_future (false);
+		} else {
+			return _conn.value ()->send_binary (_data);
+		}
 	}
 	std::optional<std::tuple<std::string, uint16_t>> get_client_remote_info (int64_t _cid) {
 		auto _conn = _get_connect (_cid);
@@ -95,24 +107,27 @@ public:
 			_conn.value ()->close ();
 	}
 
-	bool send_all_client_string (std::string _data) {
+	std::future<int> &&send_all_client_string (const std::string &_data) {
 		std::unique_lock<std::recursive_mutex> ul2 { m_mtx_cid };
 		std::vector<int64_t> _v;
 		_v.assign (m_conn_cids.begin (), m_conn_cids.end ());
 		ul2.unlock ();
+		std::vector<std::future<bool>> _vfut;
+		_vfut.reserve (_v.size ());
 		for (int64_t _cid : _v) {
 			auto _conn = _get_connect (_cid);
-			return _conn.has_value () ? _conn.value ()->send_string (_data) : false;
+			if (_conn.has_value ())
+				_vfut.emplace_back (_conn.value ()->send_string (_data));
 		}
 	}
-	bool send_all_client_binary (const uint8_t *_data, size_t _size) {
+	bool send_all_client_binary (const std::vector<uint8_t> &_data) {
 		std::unique_lock<std::recursive_mutex> ul2 { m_mtx_cid };
 		std::vector<int64_t> _v;
 		_v.assign (m_conn_cids.begin (), m_conn_cids.end ());
 		ul2.unlock ();
 		for (int64_t _cid : _v) {
 			auto _conn = _get_connect (_cid);
-			return _conn.has_value () ? _conn.value ()->send_binary (_data, _size) : false;
+			return _conn.has_value () ? _conn.value ()->send_binary (_data) : false;
 		}
 	}
 	void close_all_client () {
@@ -180,17 +195,17 @@ private:
 			m_conn_cids.insert (_iter, _cid);
 		ul2.unlock ();
 	}
-	std::optional<std::shared_ptr<im_connect_t>> _get_connect (xfinal::websocket &ws, bool _erase = false) {
+	std::optional<std::shared_ptr<im_connect_t>> _get_connect (xfinal::websocket &ws, _find_type_t _find_type = _find_type_t::stay) {
 		int64_t _cid = *ws.get_user_data<std::shared_ptr<int64_t>> ("cid");
-		return (_get_connect (_cid, _erase));
+		return (_get_connect (_cid, _find_type));
 	}
-	std::optional<std::shared_ptr<im_connect_t>> _get_connect (int64_t _cid, bool _erase = false) {
+	std::optional<std::shared_ptr<im_connect_t>> _get_connect (int64_t _cid, _find_type_t _find_type = _find_type_t::stay) {
 		std::unique_lock<std::recursive_mutex> ul { m_mtx };
 		auto _p = m_conns.find (_cid);
 		if (_p == m_conns.end ())
 			return std::nullopt;
 		auto _ret = _p->second;
-		if (_erase) {
+		if (_find_type == _find_type_t::remove) {
 			m_conns.erase (_p);
 			ul.unlock ();
 			//
@@ -204,20 +219,20 @@ private:
 		return _ret;
 	}
 
-	size_t																	m_io_thread_num;
-	std::shared_ptr<xfinal::http_server>									m_server;
-	xfinal::websocket_event													m_event;
-	std::recursive_mutex													m_mtx;
-	std::map<int64_t, std::shared_ptr<im_connect_t>>						m_conns;
-	std::recursive_mutex													m_mtx_cid;
-	std::vector<int64_t>													m_conn_cids;
-	int64_t																	m_inc_cid = 0;
-	taskpool_t																m_pool;
+	size_t																		m_io_thread_num;
+	std::shared_ptr<xfinal::http_server>										m_server;
+	xfinal::websocket_event														m_event;
+	std::recursive_mutex														m_mtx;
+	std::map<int64_t, std::shared_ptr<im_connect_t>>							m_conns;
+	std::recursive_mutex														m_mtx_cid;
+	std::vector<int64_t>														m_conn_cids;
+	int64_t																		m_inc_cid = 0;
+	taskpool_t																	m_pool;
 
-	std::function<std::optional<int64_t> (std::shared_ptr<im_connect_t>)>	m_open_callback;
-	std::function<void (std::shared_ptr<im_connect_t>, std::string)>		m_string_message_callback;
-	std::function<void (std::shared_ptr<im_connect_t>, std::string)>		m_binary_message_callback;
-	std::function<void (int64_t)>											m_close_callback;
+	std::function<std::optional<int64_t> (std::shared_ptr<im_connect_t>)>		m_open_callback;
+	std::function<void (std::shared_ptr<im_connect_t>, std::string)>			m_string_message_callback;
+	std::function<void (std::shared_ptr<im_connect_t>, std::vector<uint8_t>)>	m_binary_message_callback;
+	std::function<void (int64_t)>												m_close_callback;
 };
 
 

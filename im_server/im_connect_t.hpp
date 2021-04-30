@@ -4,8 +4,10 @@
 
 
 #include <cstdint>
+#include <future>
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "../xfinal/xfinal/xfinal.hpp"
 
@@ -17,19 +19,25 @@ public:
 
 	bool is_connecting () { return m_ws->socket ().is_open (); }
 
-	bool send_string (std::string _data) {
-		if (!is_connecting ())
-			return false;
-		m_ws->write_string (_data);
-		return true;
+	std::future<bool> &&send_string (const std::string &_data) {
+		if (!is_connecting ()) {
+			return common_t::get_valued_future (false);
+		} else {
+			std::shared_ptr<std::promise<bool>> _promise = std::make_shared<std::promise<bool>> ();
+			m_ws->write_string (_data, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
+			return _promise->get_future ();
+		}
 	}
 
-	bool send_binary (const uint8_t *_data, size_t _size) {
-		if (!is_connecting ())
-			return false;
-		std::string _tmp { (const char *) _data, _size };
-		m_ws->write_binary (_tmp);
-		return true;
+	std::future<bool> &&send_binary (const std::vector<uint8_t> &_data) {
+		if (!is_connecting ()) {
+			return common_t::get_valued_future (false);
+		} else {
+			std::shared_ptr<std::promise<bool>> _promise = std::make_shared<std::promise<bool>> ();
+			std::string _data2 (_data.begin (), _data.end ());
+			m_ws->write_binary (_data2, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
+			return _promise->get_future ();
+		}
 	}
 
 	std::tuple<std::string, uint16_t> remote_info () {
