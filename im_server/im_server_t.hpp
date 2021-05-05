@@ -119,16 +119,35 @@ public:
 			if (_conn.has_value ())
 				_vfut.emplace_back (_conn.value ()->send_string (_data));
 		}
+		std::future<std::vector<bool>> _fut0 = m_pool.async_wait_all (std::move (_vfut));
+		std::future<int> _fut1 = m_pool.async_after_run (std::move (_fut0), [] (std::vector<bool> _vsend) -> int {
+			int _count = 0;
+			for (bool _b : _vsend)
+				_count += _b ? 1 : 0;
+			return _count;
+		});
+		return std::move (_fut1);
 	}
-	bool send_all_client_binary (const std::vector<uint8_t> &_data) {
+	std::future<int> &&send_all_client_binary (const std::vector<uint8_t> &_data) {
 		std::unique_lock<std::recursive_mutex> ul2 { m_mtx_cid };
 		std::vector<int64_t> _v;
 		_v.assign (m_conn_cids.begin (), m_conn_cids.end ());
 		ul2.unlock ();
+		std::vector<std::future<bool>> _vfut;
+		_vfut.reserve (_v.size ());
 		for (int64_t _cid : _v) {
 			auto _conn = _get_connect (_cid);
-			return _conn.has_value () ? _conn.value ()->send_binary (_data) : false;
+			if (_conn.has_value ())
+				_vfut.emplace_back (_conn.value ()->send_binary (_data));
 		}
+		std::future<std::vector<bool>> _fut0 = m_pool.async_wait_all (std::move (_vfut));
+		std::future<int> _fut1 = m_pool.async_after_run (std::move (_fut0), [] (std::vector<bool> _vsend) -> int {
+			int _count = 0;
+			for (bool _b : _vsend)
+				_count += _b ? 1 : 0;
+			return _count;
+		});
+		return std::move (_fut1);
 	}
 	void close_all_client () {
 		std::unique_lock<std::recursive_mutex> ul { m_mtx };
