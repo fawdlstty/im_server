@@ -32,7 +32,7 @@ int main () {
 			});
 		}
 	});
-	s_server.on_binary_message_callback ([] (std::shared_ptr<im_connect_t> _conn, std::vector<uint8_t> _data) {
+	s_server.on_binary_message_callback ([] (std::shared_ptr<im_connect_t> _conn, span_t<uint8_t> _data) {
 		std::cout << "recv binary(size): " << _data.size () << std::endl;
 	});
 	s_server.on_close_callback ([] (int64_t _cid) {

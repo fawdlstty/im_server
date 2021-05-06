@@ -56,8 +56,8 @@ public:
 				m_pool.async_run (m_string_message_cb, _conn.value (), _recv);
 			} else if (ws.message_code () == 2) {
 				std::string_view _view = ws.messages ();
-				std::vector<uint8_t> _v (_view.begin (), _view.end ());
-				m_pool.async_run (m_binary_message_cb, _conn.value (), std::move (_v));
+				span_t<uint8_t> _v { (uint8_t *) _view.data (), _view.size () };
+				m_pool.async_run (m_binary_message_cb, _conn.value (), _v);
 			}
 		});
 		m_event.on ("close", [this] (xfinal::websocket &ws) {
@@ -75,7 +75,7 @@ public:
 	void on_string_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::string)> _cb) {
 		m_string_message_cb = _cb;
 	}
-	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::vector<uint8_t>)> _cb) {
+	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)> _cb) {
 		m_binary_message_cb = _cb;
 	}
 	void on_close_callback (std::function<void (int64_t)> _cb) {
@@ -251,7 +251,7 @@ private:
 
 	std::function<fa::future_t<std::optional<int64_t>> && (std::shared_ptr<im_connect_t>)>	m_open_cb;
 	std::function<void (std::shared_ptr<im_connect_t>, std::string)>						m_string_message_cb;
-	std::function<void (std::shared_ptr<im_connect_t>, std::vector<uint8_t>)>				m_binary_message_cb;
+	std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)>					m_binary_message_cb;
 	std::function<void (int64_t)>															m_close_cb;
 };
 

@@ -3,6 +3,7 @@
 
 
 
+#include "span_t.hpp"
 #include "common_t.hpp"
 #include "im_connect_t.hpp"
 #include "im_server_t.hpp"
