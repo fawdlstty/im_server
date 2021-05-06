@@ -5,18 +5,20 @@
 
 #include <future>
 
+#include "../taskpool/taskpool_t.hpp"
+
 
 
 struct common_t {
-	static std::future<void> &&get_valued_future () {
-		std::promise<void> _promise;
+	static fa::future_t<void> &&get_valued_future () {
+		fa::promise_t<void> _promise;
 		_promise.set_value ();
 		return std::move (_promise.get_future ());
 	}
 
 	template<typename T>
-	static std::future<T> &&get_valued_future (T &&t) {
-		std::promise<T> _promise;
+	static fa::future_t<T> &&get_valued_future (T &&t) {
+		fa::promise_t<T> _promise;
 		_promise.set_value (std::move (t));
 		return std::move (_promise.get_future ());
 	}

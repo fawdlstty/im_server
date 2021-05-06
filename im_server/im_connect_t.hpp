@@ -9,7 +9,9 @@
 #include <tuple>
 #include <vector>
 
+#include "../taskpool/taskpool_t.hpp"
 #include "../xfinal/xfinal/xfinal.hpp"
+#include "common_t.hpp"
 
 
 
@@ -19,24 +21,24 @@ public:
 
 	bool is_connecting () { return m_ws->socket ().is_open (); }
 
-	std::future<bool> &&send_string (const std::string &_data) {
+	fa::future_t<bool> &&send_string (const std::string &_data) {
 		if (!is_connecting ()) {
-			return common_t::get_valued_future (false);
+			return std::move (common_t::get_valued_future (false));
 		} else {
-			std::shared_ptr<std::promise<bool>> _promise = std::make_shared<std::promise<bool>> ();
+			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
 			m_ws->write_string (_data, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
-			return _promise->get_future ();
+			return std::move (_promise->get_future ());
 		}
 	}
 
-	std::future<bool> &&send_binary (const std::vector<uint8_t> &_data) {
+	fa::future_t<bool> &&send_binary (const std::vector<uint8_t> &_data) {
 		if (!is_connecting ()) {
-			return common_t::get_valued_future (false);
+			return std::move (common_t::get_valued_future (false));
 		} else {
-			std::shared_ptr<std::promise<bool>> _promise = std::make_shared<std::promise<bool>> ();
+			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
 			std::string _data2 (_data.begin (), _data.end ());
 			m_ws->write_binary (_data2, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
-			return _promise->get_future ();
+			return std::move (_promise->get_future ());
 		}
 	}
 
@@ -49,16 +51,16 @@ public:
 
 	void close () { m_ws->close (); }
 
-	int64_t get_cid () { return m_cid; }
+	int64_t get_uid () { return m_uid; }
 
-	void _set_cid (int64_t _cid) {
-		m_cid = _cid;
-		m_ws->set_user_data ("cid", std::make_shared<int64_t> (_cid));
+	void _set_uid (int64_t _uid) {
+		m_uid = _uid;
+		m_ws->set_user_data ("uid", std::make_shared<int64_t> (_uid));
 	}
 
 private:
 	std::shared_ptr<xfinal::websocket> m_ws;
-	int64_t m_cid = -1;
+	int64_t m_uid = -1;
 };
 
 

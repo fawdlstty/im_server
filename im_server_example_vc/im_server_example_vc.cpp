@@ -5,18 +5,20 @@
 #include <string>
 
 #include <im_server/im_server.hpp>
+#include "../taskpool/taskpool_t.hpp"
+//#include <im_server/im_server_t.hpp>
 
 
 
-taskpool_t s_pool { 1 };
+fa::taskpool_t s_pool { 1 };
 im_server_t s_server { 1, 1 };
 
 int main () {
-	s_server.on_open_callback ([] (std::shared_ptr<im_connect_t> _conn) -> std::optional<int64_t> {
+	s_server.on_open_callback ([] (std::shared_ptr<im_connect_t> _conn) -> fa::future_t<std::optional<int64_t>>&& {
 		std::string _val = _conn->get_param ("xx");
 		auto [_ip, _port] = _conn->remote_info ();
 		std::cout << "connect: " << _ip << "[" << _port << "] xx[" << _val << "]" << std::endl;
-		return 1;
+		return common_t::get_valued_future<std::optional<int64_t>> (1);
 	});
 	s_server.on_string_message_callback ([&] (std::shared_ptr<im_connect_t> _conn, std::string _data) {
 		std::cout << "recv string: " << _data << std::endl;

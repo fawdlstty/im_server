@@ -4,3 +4,7 @@
 [submodule "taskpool"]
 	path = taskpool
 	url = https://github.com/fawdlstty/taskpool
+[submodule "ormpp"]
+	path = ormpp
+	url = https://github.com/qicosmos/ormpp
+	branch = master

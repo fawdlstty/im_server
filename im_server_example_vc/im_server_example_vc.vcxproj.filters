@@ -119,5 +119,8 @@
     <ClInclude Include="..\im_server\common_t.hpp">
       <Filter>头文件\im_server</Filter>
     </ClInclude>
+    <ClInclude Include="..\im_server\im_typed_server_t.hpp">
+      <Filter>头文件\im_server</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
