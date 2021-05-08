@@ -10,17 +10,17 @@
 
 
 struct common_t {
-	static fa::future_t<void> &&get_valued_future () {
+	static fa::future_t<void> get_valued_future () {
 		fa::promise_t<void> _promise;
 		_promise.set_value ();
-		return std::move (_promise.get_future ());
+		return _promise.get_future ();
 	}
 
 	template<typename T>
-	static fa::future_t<T> &&get_valued_future (T &&t) {
+	static fa::future_t<T> get_valued_future (T &&t) {
 		fa::promise_t<T> _promise;
 		_promise.set_value (std::move (t));
-		return std::move (_promise.get_future ());
+		return _promise.get_future ();
 	}
 };
 

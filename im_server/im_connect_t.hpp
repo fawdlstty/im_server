@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <future>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>

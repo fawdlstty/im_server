@@ -1,10 +1,10 @@
 [submodule "xfinal"]
 	path = xfinal
-	url = https://github.com/xmh0511/xfinal
+	url = https://hub.fastgit.org/xmh0511/xfinal
 [submodule "taskpool"]
 	path = taskpool
-	url = https://github.com/fawdlstty/taskpool
+	url = https://hub.fastgit.org/fawdlstty/taskpool
 [submodule "ormpp"]
 	path = ormpp
-	url = https://github.com/qicosmos/ormpp
+	url = https://hub.fastgit.org/qicosmos/ormpp
 	branch = master

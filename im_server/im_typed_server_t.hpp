@@ -42,7 +42,7 @@ public:
 	//	m_on_message = _on_message;
 	//}
 
-	void set_allow_transfer (std::function<std::future<bool> &&(int64_t _msg_id, int64_t _send_uid, int64_t _recv_uid, im_msg_type_t _msg_type)> _cb) {
+	void set_allow_transfer (std::function<fa::future_t<bool> &&(int64_t _msg_id, int64_t _send_uid, int64_t _recv_uid, im_msg_type_t _msg_type)> _cb) {
 		m_allow_transfer = _cb;
 	}
 
@@ -52,7 +52,7 @@ public:
 
 private:
 	//std::function<void (int64_t _msg_id, int64_t _send_uid, int64_t _recv_uid, im_msg_type_t _msg_type, im_msg_flag_t _msg_flag, std::span<uint8_t> _msg)> m_on_message;
-	std::function<std::future<bool> &&(int64_t _msg_id, int64_t _send_uid, int64_t _recv_uid, im_msg_type_t _msg_type)> m_allow_transfer;
+	std::function<fa::future_t<bool> &&(int64_t _msg_id, int64_t _send_uid, int64_t _recv_uid, im_msg_type_t _msg_type)> m_allow_transfer;
 };
 
 
