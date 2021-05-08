@@ -82,18 +82,18 @@ public:
 		m_close_cb = _cb;
 	}
 
-	fa::future_t<bool> &&send_client_string (int64_t _uid, const std::string &_data) {
+	fa::future_t<bool> send_client_string (int64_t _uid, const std::string &_data) {
 		auto _conn = _get_connect (_uid);
 		if (!_conn.has_value ()) {
-			return std::move (common_t::get_valued_future (false));
+			return common_t::get_valued_future (false);
 		} else {
 			return _conn.value ()->send_string (_data);
 		}
 	}
-	fa::future_t<bool> &&send_client_binary (int64_t _uid, const std::vector<uint8_t> &_data) {
+	fa::future_t<bool> send_client_binary (int64_t _uid, span_t<uint8_t> _data) {
 		auto _conn = _get_connect (_uid);
 		if (!_conn.has_value ()) {
-			return std::move (common_t::get_valued_future (false));
+			return common_t::get_valued_future (false);
 		} else {
 			return _conn.value ()->send_binary (_data);
 		}
@@ -108,7 +108,7 @@ public:
 			_conn.value ()->close ();
 	}
 
-	fa::future_t<int> &&send_all_client_string (const std::string &_data) {
+	fa::future_t<int> send_all_client_string (const std::string &_data) {
 		std::unique_lock<std::recursive_mutex> ul2 { m_mtx_uid };
 		std::vector<int64_t> _v;
 		_v.assign (m_conn_uids.begin (), m_conn_uids.end ());
@@ -127,9 +127,9 @@ public:
 				_count += _b ? 1 : 0;
 			return _count;
 		});
-		return std::move (_fut1);
+		return _fut1;
 	}
-	fa::future_t<int> &&send_all_client_binary (const std::vector<uint8_t> &_data) {
+	fa::future_t<int> send_all_client_binary (span_t<uint8_t> _data) {
 		std::unique_lock<std::recursive_mutex> ul2 { m_mtx_uid };
 		std::vector<int64_t> _v;
 		_v.assign (m_conn_uids.begin (), m_conn_uids.end ());
@@ -148,7 +148,7 @@ public:
 				_count += _b ? 1 : 0;
 			return _count;
 		});
-		return std::move (_fut1);
+		return _fut1;
 	}
 	void close_all_client () {
 		std::unique_lock<std::recursive_mutex> ul { m_mtx };
@@ -242,20 +242,20 @@ private:
 		return _ret;
 	}
 
-	size_t																					m_io_thread_num;
-	std::shared_ptr<xfinal::http_server>													m_server;
-	xfinal::websocket_event																	m_event;
-	std::recursive_mutex																	m_mtx;
-	std::map<int64_t, std::shared_ptr<im_connect_t>>										m_conns;
-	std::recursive_mutex																	m_mtx_uid;
-	std::vector<int64_t>																	m_conn_uids;
-	int64_t																					m_inc_uid = 0;
-	fa::taskpool_t																			m_pool;
+	size_t																				m_io_thread_num;
+	std::shared_ptr<xfinal::http_server>												m_server;
+	xfinal::websocket_event																m_event;
+	std::recursive_mutex																m_mtx;
+	std::map<int64_t, std::shared_ptr<im_connect_t>>									m_conns;
+	std::recursive_mutex																m_mtx_uid;
+	std::vector<int64_t>																m_conn_uids;
+	int64_t																				m_inc_uid = 0;
+	fa::taskpool_t																		m_pool;
 
 	std::function<fa::future_t<std::optional<int64_t>> (std::shared_ptr<im_connect_t>)>	m_open_cb;
-	std::function<void (std::shared_ptr<im_connect_t>, std::string)>						m_string_message_cb;
-	std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)>					m_binary_message_cb;
-	std::function<void (int64_t)>															m_close_cb;
+	std::function<void (std::shared_ptr<im_connect_t>, std::string)>					m_string_message_cb;
+	std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)>				m_binary_message_cb;
+	std::function<void (int64_t)>														m_close_cb;
 };
 
 

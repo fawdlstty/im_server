@@ -22,24 +22,24 @@ public:
 
 	bool is_connecting () { return m_ws->socket ().is_open (); }
 
-	fa::future_t<bool> &&send_string (const std::string &_data) {
+	fa::future_t<bool> send_string (const std::string &_data) {
 		if (!is_connecting ()) {
-			return std::move (common_t::get_valued_future (false));
+			return common_t::get_valued_future (false);
 		} else {
 			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
 			m_ws->write_string (_data, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
-			return std::move (_promise->get_future ());
+			return _promise->get_future ();
 		}
 	}
 
-	fa::future_t<bool> &&send_binary (const std::vector<uint8_t> &_data) {
+	fa::future_t<bool> send_binary (span_t<uint8_t> _data) {
 		if (!is_connecting ()) {
-			return std::move (common_t::get_valued_future (false));
+			return common_t::get_valued_future (false);
 		} else {
 			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
-			std::string _data2 (_data.begin (), _data.end ());
+			std::string _data2 ((const char *) _data.data (), _data.size ());
 			m_ws->write_binary (_data2, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
-			return std::move (_promise->get_future ());
+			return _promise->get_future ();
 		}
 	}
 
