@@ -12,7 +12,6 @@
 
 #include "../taskpool/taskpool_t.hpp"
 #include "../xfinal/xfinal/xfinal.hpp"
-#include "common_t.hpp"
 
 
 
@@ -24,7 +23,7 @@ public:
 
 	fa::future_t<bool> send_string (const std::string &_data) {
 		if (!is_connecting ()) {
-			return common_t::get_valued_future (false);
+			return fa::future_t<bool>::from_value (false);
 		} else {
 			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
 			m_ws->write_string (_data, [_promise] (bool _success, std::error_code _ec) { _promise->set_value (_success); });
@@ -34,7 +33,7 @@ public:
 
 	fa::future_t<bool> send_binary (span_t<uint8_t> _data) {
 		if (!is_connecting ()) {
-			return common_t::get_valued_future (false);
+			return fa::future_t<bool>::from_value (false);
 		} else {
 			std::shared_ptr<fa::promise_t<bool>> _promise = std::make_shared<fa::promise_t<bool>> ();
 			std::string _data2 ((const char *) _data.data (), _data.size ());

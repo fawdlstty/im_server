@@ -14,7 +14,6 @@
 
 #include "../taskpool/taskpool_t.hpp"
 #include "../xfinal/xfinal/xfinal.hpp"
-#include "common_t.hpp"
 #include "im_connect_t.hpp"
 
 
@@ -85,7 +84,7 @@ public:
 	fa::future_t<bool> send_client_string (int64_t _uid, const std::string &_data) {
 		auto _conn = _get_connect (_uid);
 		if (!_conn.has_value ()) {
-			return common_t::get_valued_future (false);
+			return fa::future_t<bool>::from_value (false);
 		} else {
 			return _conn.value ()->send_string (_data);
 		}
@@ -93,7 +92,7 @@ public:
 	fa::future_t<bool> send_client_binary (int64_t _uid, span_t<uint8_t> _data) {
 		auto _conn = _get_connect (_uid);
 		if (!_conn.has_value ()) {
-			return common_t::get_valued_future (false);
+			return fa::future_t<bool>::from_value (false);
 		} else {
 			return _conn.value ()->send_binary (_data);
 		}
