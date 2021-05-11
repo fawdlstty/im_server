@@ -7,7 +7,6 @@
 #include <functional>
 #include <future>
 #include <memory>
-#include <span>
 #include <vector>
 
 #include "im_server_t.hpp"
