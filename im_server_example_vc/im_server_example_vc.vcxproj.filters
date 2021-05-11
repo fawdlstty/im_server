@@ -125,5 +125,8 @@
     <ClInclude Include="..\im_server\span_t.hpp">
       <Filter>头文件\im_server</Filter>
     </ClInclude>
+    <ClInclude Include="..\taskpool\objectpool_t.hpp">
+      <Filter>头文件\taskpool</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
