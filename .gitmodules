@@ -8,3 +8,7 @@
 	path = ormpp
 	url = https://hub.fastgit.org/qicosmos/ormpp
 	branch = master
+[submodule "iguana"]
+	path = iguana
+	url = https://hub.fastgit.org/qicosmos/iguana
+	branch = master

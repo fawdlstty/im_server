@@ -9,6 +9,14 @@
 #include "../taskpool/objectpool_t.hpp"
 ////#include <im_server/im_server_t.hpp>
 
+#define ORMPP_ENABLE_MYSQL
+#include "../ormpp/mysql.hpp"
+#include "../ormpp/dbng.hpp"
+
+#ifdef _MSC_VER
+#pragma comment (lib, "Crypt32.lib")
+#endif
+
 
 
 fa::taskpool_t s_pool { 1 };
@@ -16,7 +24,24 @@ im_server_t s_server { 1, 1 };
 
 
 
+struct tb_person {
+	int64_t id;
+	std::string name;
+	int age;
+};
+REFLECTION (tb_person, id, name, age)
+
 int main () {
+	ormpp::dbng<ormpp::mysql> _sql;
+	bool _is_conn = _sql.connect ("127.0.0.1", "username", "password", "dbname", 3306);
+	tb_person p { 0, "kangkang", 18 };
+	int x = _sql.insert (p);
+	x = x;
+
+
+
+
+
 	if (!s_server.init (8080, "/ws")) {
 		std::cout << "listen failed.\n";
 		return 0;
