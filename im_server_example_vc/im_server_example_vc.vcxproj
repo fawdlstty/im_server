@@ -171,7 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\im_server\common_t.hpp" />
-    <ClInclude Include="..\im_server\im_typed_server_t.hpp" />
+    <ClInclude Include="..\im_server\im_offline_server_t.hpp" />
     <ClInclude Include="..\im_server\im_connect_t.hpp" />
     <ClInclude Include="..\im_server\im_server.hpp" />
     <ClInclude Include="..\im_server\im_server_t.hpp" />
