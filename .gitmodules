@@ -4,11 +4,3 @@
 [submodule "taskpool"]
 	path = taskpool
 	url = https://hub.fastgit.org/fawdlstty/taskpool
-[submodule "ormpp"]
-	path = ormpp
-	url = https://hub.fastgit.org/qicosmos/ormpp
-	branch = master
-[submodule "iguana"]
-	path = iguana
-	url = https://hub.fastgit.org/qicosmos/iguana
-	branch = master
