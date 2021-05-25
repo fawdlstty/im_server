@@ -66,12 +66,17 @@
 
 class im_offline_server_t {
 public:
-	im_offline_server_t (size_t _process_thread_num, uint16_t _port): m_server (1, _process_thread_num), m_port (_port) {}
+	im_offline_server_t (): m_server (1, 1) {}
+
+	bool init (uint16_t _port, std::string _prefix = "/") {
+		return m_server.init (_port, "/ws");
+	}
+
+	std::shared_ptr<xfinal::http_server> get_server () {
+		return m_server.get_server ();
+	}
 
 	bool run (bool block_this_thread = true) {
-		if (!m_server.init (m_port, "/ws"))
-			return false;
-
 		m_server.on_open_callback ([this] (std::shared_ptr<im_connect_t> _conn) -> std::optional<int64_t> {
 			try {
 				// ¼øÈ¨
@@ -164,7 +169,6 @@ private:
 	}
 
 	im_server_t m_server;
-	uint16_t m_port;
 	fa::taskpool_t m_tpool { 1 };
 
 public:
