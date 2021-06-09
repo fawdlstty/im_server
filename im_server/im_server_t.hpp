@@ -30,7 +30,7 @@ class im_server_t {
 	enum class _find_type_t { stay, remove };
 
 public:
-	im_server_t (size_t _io_thread_num, size_t _process_thread_num): m_io_thread_num (_io_thread_num), m_pool (_process_thread_num) {
+	im_server_t (size_t _io_thread_num, size_t _process_thread_num): m_io_thread_num (_io_thread_num), m_tpool (_process_thread_num) {
 		m_event.on ("open", [this] (xfinal::websocket &ws) {
 			if (!m_open_cb)
 				return;
@@ -41,7 +41,7 @@ public:
 				_add_connect (_uid, _connect_t);
 			} else {
 				fa::future_t<bool> &&_fut = _connect_t->send_string (R"({"type":"auth","result":"failure","reason":"auth fail"})");
-				m_pool.async_after_run (std::move (_fut), [_connect_t] (bool) { _connect_t->close (); });
+				m_tpool.async_after_run (std::move (_fut), [_connect_t] (bool &&) { _connect_t->close (); });
 			}
 		});
 		m_event.on ("message", [this] (xfinal::websocket &ws) {
@@ -50,11 +50,11 @@ public:
 				return;
 			if (ws.message_code () == 1) {
 				std::string _recv = std::string (ws.messages ());
-				m_pool.async_run (m_string_message_cb, _conn.value (), _recv);
+				m_tpool.async_run (m_string_message_cb, _conn.value (), _recv);
 			} else if (ws.message_code () == 2) {
 				std::string_view _view = ws.messages ();
 				span_t<uint8_t> _v { (uint8_t *) _view.data (), _view.size () };
-				m_pool.async_run (m_binary_message_cb, _conn.value (), _v);
+				m_tpool.async_run (m_binary_message_cb, _conn.value (), _v);
 			}
 		});
 		m_event.on ("close", [this] (xfinal::websocket &ws) {
@@ -62,21 +62,8 @@ public:
 			if (!_conn.has_value ())
 				return;
 			if (m_close_cb)
-				m_pool.async_run (m_close_cb, _conn.value ()->get_uid ());
+				m_tpool.async_run (m_close_cb, _conn.value ()->get_uid ());
 		});
-	}
-
-	void on_open_callback (std::function<std::optional<int64_t> (std::shared_ptr<im_connect_t>)> _cb) {
-		m_open_cb = _cb;
-	}
-	void on_string_message_callback (std::function<void (std::shared_ptr<im_connect_t>, std::string)> _cb) {
-		m_string_message_cb = _cb;
-	}
-	void on_binary_message_callback (std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)> _cb) {
-		m_binary_message_cb = _cb;
-	}
-	void on_close_callback (std::function<void (int64_t)> _cb) {
-		m_close_cb = _cb;
 	}
 
 	fa::future_t<bool> send_client_string (int64_t _uid, const std::string &_data) {
@@ -117,8 +104,8 @@ public:
 			if (_conn.has_value ())
 				_vfut.emplace_back (_conn.value ()->send_string (_data));
 		}
-		fa::future_t<std::vector<bool>> _fut0 = m_pool.async_wait_all (std::move (_vfut));
-		fa::future_t<int> _fut1 = m_pool.async_after_run (std::move (_fut0), [] (std::vector<bool> _vsend) -> int {
+		fa::future_t<std::vector<bool>> _fut0 = m_tpool.async_wait_all (std::move (_vfut));
+		fa::future_t<int> _fut1 = m_tpool.async_after_run (std::move (_fut0), [] (std::vector<bool> &&_vsend) -> int {
 			int _count = 0;
 			for (bool _b : _vsend)
 				_count += _b ? 1 : 0;
@@ -138,8 +125,8 @@ public:
 			if (_conn.has_value ())
 				_vfut.emplace_back (_conn.value ()->send_binary (_data));
 		}
-		fa::future_t<std::vector<bool>> _fut0 = m_pool.async_wait_all (std::move (_vfut));
-		fa::future_t<int> _fut1 = m_pool.async_after_run (std::move (_fut0), [] (std::vector<bool> _vsend) -> int {
+		fa::future_t<std::vector<bool>> _fut0 = m_tpool.async_wait_all (std::move (_vfut));
+		fa::future_t<int> _fut1 = m_tpool.async_after_run (std::move (_fut0), [] (std::vector<bool> &&_vsend) -> int {
 			int _count = 0;
 			for (bool _b : _vsend)
 				_count += _b ? 1 : 0;
@@ -251,8 +238,9 @@ private:
 	std::recursive_mutex													m_mtx_uid;
 	std::vector<int64_t>													m_conn_uids;
 	int64_t																	m_inc_uid = 0;
-	fa::taskpool_t															m_pool;
 
+public:
+	fa::taskpool_t															m_tpool;
 	std::function<std::optional<int64_t> (std::shared_ptr<im_connect_t>)>	m_open_cb;
 	std::function<void (std::shared_ptr<im_connect_t>, std::string)>		m_string_message_cb;
 	std::function<void (std::shared_ptr<im_connect_t>, span_t<uint8_t>)>	m_binary_message_cb;
