@@ -34,14 +34,15 @@ public:
 		m_event.on ("open", [this] (xfinal::websocket &ws) {
 			if (!m_open_cb)
 				return;
-			auto _connect_t = std::make_shared<im_connect_t> (ws.shared_from_this ());
-			std::optional<int64_t> _ouid = m_open_cb (_connect_t);
+			auto _conn = std::make_shared<im_connect_t> (ws.shared_from_this ());
+			std::optional<int64_t> _ouid = m_open_cb (_conn);
 			if (_ouid.has_value ()) {
 				int64_t _uid = _ouid.value ();
-				_add_connect (_uid, _connect_t);
+				_add_connect (_uid, _conn);
 			} else {
-				fa::future_t<bool> &&_fut = _connect_t->send_string (R"({"type":"auth","result":"failure","reason":"auth fail"})");
-				m_tpool.async_after_run (std::move (_fut), [_connect_t] (bool &&) { _connect_t->close (); });
+				_conn->_set_uid (-1);
+				fa::future_t<bool> &&_fut = _conn->send_string (R"({"type":"auth","result":false,"reason":"auth fail"})");
+				m_tpool.async_after_run (std::move (_fut), [_conn] (bool &&) { _conn->close (); });
 			}
 		});
 		m_event.on ("message", [this] (xfinal::websocket &ws) {
@@ -208,6 +209,8 @@ private:
 	}
 	std::optional<std::shared_ptr<im_connect_t>> _get_connect (xfinal::websocket &ws, _find_type_t _find_type) {
 		int64_t _uid = *ws.get_user_data<std::shared_ptr<int64_t>> ("uid");
+		if (_uid == -1)
+			return std::nullopt;
 		return (_get_connect (_uid, _find_type));
 	}
 	std::optional<std::shared_ptr<im_connect_t>> _get_connect (int64_t _uid, _find_type_t _find_type) {
